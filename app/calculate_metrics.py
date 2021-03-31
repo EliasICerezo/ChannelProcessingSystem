@@ -1,6 +1,7 @@
 import json
 import time
 import pandas as pd
+import numpy as np
 class MetricsCalculation():
 
   @staticmethod
@@ -10,14 +11,14 @@ class MetricsCalculation():
     # Performance metrics gathering
     if metrics is not None:
       start = time.time()
-    
-    channels['Y'] = [(parameters.get('m')*x+parameters.get('c')) for x in channels.get('X')]
-    channels['A'] = [1/x for x in channels.get('X')]
+    # TODO: Adapt the operations to be made with numpy
+    channels['Y'] = (parameters.get('m')*channels.get('X')+parameters.get('c'))
+    channels['A'] = 1/channels.get('X')
     if len(channels['A']) != len(channels['Y']):
       raise Exception('The 2 channels required to calculate B do not have the same number of elements')
-    channels['B'] = [channels['A'][i] + channels['Y'][i] for i in range(len(channels['Y']))]
-    parameters['b'] = sum(channels['B']) / len(channels['B'])
-    channels['C'] = [x+parameters['b'] for x in channels.get('X')]
+    channels['B'] = channels.get('A') + channels.get('Y')
+    parameters['b'] = np.mean(channels.get('B'))
+    channels['C'] = channels.get('X') + parameters['b']
     
     # Performance metrics gathering
     if metrics is not None:
@@ -49,7 +50,9 @@ class MetricsCalculation():
         name (str): Name of the file to be ammended (the full name of the file 
                     will include "processed_NAME" where NAME is the content 
                     of this variable)
-    """     
+    """
+    if([*data][0].isupper()):
+      data = {k: v.tolist() for k,v in data.items()}
     # Writes to JSON
     with open('./data/processed/processed_{}.json'.format(name),'w') as f:
       f.write(json.dumps(data, indent=4))

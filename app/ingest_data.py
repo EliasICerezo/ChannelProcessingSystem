@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import time
 import os
@@ -37,7 +38,8 @@ class DataIngestor():
           tokens = line.split(',')
           if len(tokens) < 2:
             raise Exception("Error while processing channels: Channel not defined correctly")
-          channels[tokens[0]] = [float(e) for e in tokens[1:]]
+          dataset = [float(e) for e in tokens[1:]]
+          channels[tokens[0]] =  np.array(dataset)
       
       with open(path_to_parameters) as f:
         lines = f.readlines()
