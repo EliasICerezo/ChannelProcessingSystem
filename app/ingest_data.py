@@ -1,10 +1,13 @@
+import pandas as pd
+import time
 import os
 
 class DataIngestor():
   """Class ensembling the data ingestor entity
   """
   @staticmethod
-  def ingest_data(path_to_channels:str, path_to_parameters:str) -> tuple:
+  def ingest_data(path_to_channels:str, path_to_parameters:str,
+                  metrics:pd.DataFrame = None) -> tuple:
     """Function that processes channels and parameters and returns them into a
     dictionary
 
@@ -20,7 +23,12 @@ class DataIngestor():
     Returns:
         tuple : Tuple of 2 elements: Channels and Parameters in that order 
     """
+
     if os.path.isfile(path_to_channels) and os.path.isfile(path_to_parameters):
+      #Performance metrics gathering
+      if metrics is not None:
+        start = time.time()
+      
       channels = {}
       parameters = {}
       with open(path_to_channels) as f:
@@ -39,6 +47,11 @@ class DataIngestor():
             raise Exception("Error while processing parameters: Parameter not defined correctly")
           parameters[tokens[0]] = float(tokens[1])
       
-      return channels,parameters
+      if metrics is not None:
+        end = time.time()
+        metrics = metrics.append({'key': 'data_loading', 'value':end-start},
+                               ignore_index = True)
+
+      return channels,parameters,metrics
     else:
       raise OSError("Either of the paths provided do not reference a file")

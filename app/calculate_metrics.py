@@ -1,9 +1,16 @@
 import json
+import time
 import pandas as pd
 class MetricsCalculation():
 
   @staticmethod
-  def calculate_metrics(channels:dict, parameters:dict):
+  def calculate_metrics(channels:dict, parameters:dict,
+                        metrics:pd.DataFrame = None):
+    
+    # Performance metrics gathering
+    if metrics is not None:
+      start = time.time()
+    
     channels['Y'] = [(parameters.get('m')*x+parameters.get('c')) for x in channels.get('X')]
     channels['A'] = [1/x for x in channels.get('X')]
     if len(channels['A']) != len(channels['Y']):
@@ -11,11 +18,30 @@ class MetricsCalculation():
     channels['B'] = [channels['A'][i] + channels['Y'][i] for i in range(len(channels['Y']))]
     parameters['b'] = sum(channels['B']) / len(channels['B'])
     channels['C'] = [x+parameters['b'] for x in channels.get('X')]
+    
+    # Performance metrics gathering
+    if metrics is not None:
+      end = time.time()
+      metrics = metrics.append({'key': 'metrics_calculation', 'value':end-start},
+                               ignore_index = True)
+
+    # Performance metrics gathering
+    if metrics is not None:
+      start = time.time()
+    
     MetricsCalculation.persist_data(channels, 'channels')
     MetricsCalculation.persist_data(parameters, 'parameters')
-  
+    
+    # Performance metrics gathering
+    if metrics is not None:
+      end = time.time()
+      metrics = metrics.append({'key': 'metrics_persisting', 'value':end-start},
+                               ignore_index = True)
+    
+    return metrics
+
   @staticmethod
-  def persist_data(data:dict, name:str):
+  def persist_data(data:dict, name:str, metrics: pd.DataFrame = None):
     """Function that persists the data in CSV, JSON and the original format
 
     Args:
