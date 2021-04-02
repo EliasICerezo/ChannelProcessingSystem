@@ -6,16 +6,36 @@ class MetricsCalculation():
 
   @staticmethod
   def calculate_metrics(channels:dict, parameters:dict,
-                        metrics:pd.DataFrame = None):
-    
+                        metrics:pd.DataFrame = None) -> tuple:
+    """Function that calculates the metrics using the different functions provided
+    in the system specification
+
+    Args:
+        channels (dict): Dictionary containing the channels that have been loaded
+        previously.
+        parameters (dict): Dictionary containing the parameters that have been loaded
+        before
+        metrics (pd.DataFrame, optional): Dataframe containing the performance
+        metrics. Defaults to None.
+
+    Raises:
+        Exception: If the channels required to calculate B do not have the same
+        number of elements
+
+    Returns:
+        tuple: Tuple containing the calculated channels, calculated parameters 
+        and metrics
+    """
+    if not MetricsCalculation.is_possible_to_calculate(channels,parameters):
+      raise AttributeError("Parameters and channels required for metrics \
+                           processing are not present")
     # Performance metrics gathering
     if metrics is not None:
       start = time.time()
-    # TODO: Adapt the operations to be made with numpy
     channels['Y'] = (parameters.get('m')*channels.get('X')+parameters.get('c'))
+    if sum(channels['X']) == 0:
+      raise ZeroDivisionError("Dividing by zero")
     channels['A'] = 1/channels.get('X')
-    if len(channels['A']) != len(channels['Y']):
-      raise Exception('The 2 channels required to calculate B do not have the same number of elements')
     channels['B'] = channels.get('A') + channels.get('Y')
     parameters['b'] = np.mean(channels.get('B'))
     channels['C'] = channels.get('X') + parameters['b']
@@ -25,24 +45,21 @@ class MetricsCalculation():
       end = time.time()
       metrics = metrics.append({'key': 'metrics_calculation', 'value':end-start},
                                ignore_index = True)
-
-    # Performance metrics gathering
-    if metrics is not None:
-      start = time.time()
     
-    MetricsCalculation.persist_data(channels, 'channels')
-    MetricsCalculation.persist_data(parameters, 'parameters')
-    
-    # Performance metrics gathering
-    if metrics is not None:
-      end = time.time()
-      metrics = metrics.append({'key': 'metrics_persisting', 'value':end-start},
-                               ignore_index = True)
-    
-    return metrics
+    return channels, parameters, metrics
 
   @staticmethod
-  def persist_data(data:dict, name:str, metrics: pd.DataFrame = None):
+  def is_possible_to_calculate(channels:dict, parameters:dict) -> bool:
+    if 'X' not in channels or 'm' not in parameters or 'c' not in parameters or \
+       channels.get('X') is None or parameters.get('m') is None or \
+       parameters.get('c') is None or type(channels.get('X')) != np.ndarray or \
+       len(channels.get('X')) == 0:
+      return False
+    else:
+      return True
+
+  @staticmethod
+  def persist_data(data:dict, name:str):
     """Function that persists the data in CSV, JSON and the original format
 
     Args:
