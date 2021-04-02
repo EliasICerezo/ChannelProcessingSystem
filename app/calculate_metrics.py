@@ -58,6 +58,15 @@ class MetricsCalculation():
     else:
       return True
 
+
+  @staticmethod
+  def can_persist(data:dict):
+    if len(data) == 0:
+      return False
+    if all( [k.isupper() for k in [*data]] ):
+      return all([type(v) == np.ndarray for v in list(data.values())])
+    else:
+      return all([ isinstance(v,(int,float)) for v in list(data.values())])
   @staticmethod
   def persist_data(data:dict, name:str):
     """Function that persists the data in CSV, JSON and the original format
@@ -68,6 +77,10 @@ class MetricsCalculation():
                     will include "processed_NAME" where NAME is the content 
                     of this variable)
     """
+    # Early return
+    if not MetricsCalculation.can_persist(data):
+      return
+    
     if([*data][0].isupper()):
       data = {k: v.tolist() for k,v in data.items()}
     # Writes to JSON

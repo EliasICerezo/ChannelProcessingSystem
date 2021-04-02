@@ -2,17 +2,16 @@ from app.calculate_metrics import MetricsCalculation
 import numpy as np
 import pandas as pd
 import pytest
+import json
 import re
 import os
 
 class TestCalculateMetrics():
   def setup_method(self):
-    p = re.compile('test*')
-    path_to_contents = "./data/processed"
-    directory_contents = os.listdir(path_to_contents)
-    contents_to_delete = list(filter(p.match, directory_contents))
-    for c in contents_to_delete:
-      os.remove(os.path.join(path_to_contents,c))
+    clean_files()
+  
+  def teardown_class(self):
+    clean_files()
 
   # Tests for calculate_metrics
   def test_calculate_metrics_with_empty_dictionaries_should_return_exception(self):
@@ -96,15 +95,147 @@ class TestCalculateMetrics():
                                                               'm':0})
 
   def test_is_possible_to_calculate_when_called_with_all_values_populated_but_X_is_an_one_element_numpy_aray_returns_true(self):
-      assert MetricsCalculation.is_possible_to_calculate({'X':np.array([1])},{'c':0,
+    assert MetricsCalculation.is_possible_to_calculate({'X':np.array([1])},{'c':0,
                                                               'm':0})
 
   def test_is_possible_to_calculate_when_called_with_all_values_populated_but_X_is_an_n_element_numpy_aray_returns_true(self):
-      assert MetricsCalculation.is_possible_to_calculate({'X':np.array([1,2,3,4])},{'c':0,
+    assert MetricsCalculation.is_possible_to_calculate({'X':np.array([1,2,3,4])},{'c':0,
                                                               'm':0})
-# Tests for persist_data
+  # Tests for can_persist
+  def test_can_persist_empty_data_returns_false(self):
+    assert not MetricsCalculation.can_persist({})
+  
+  def test_can_persist_incorrect_channel_data_returns_false(self):
+    assert not MetricsCalculation.can_persist({'X':None})
+  
+  def test_can_persist_incorrect_type_channel_data_returns_false(self):
+    assert not MetricsCalculation.can_persist({'X':[]})
+  
+  def test_can_persist_correct_channel_data_returns_true(self):
+    assert MetricsCalculation.can_persist({'X':np.array([])})
+  
+  def test_can_persist_incorrect_type_parameter_returns_false(self):
+    assert not MetricsCalculation.can_persist({'a':None})
+  
+  def test_can_persist_int_type_parameter_returns_true(self):
+    assert MetricsCalculation.can_persist({'a':2})
 
-# TEST THAT CREATES THE FILES
-# TEST THAT THE FILES GET CREATED EMPTY
-# TEST THAT THE FILES CONTAIN SOMETHING WHEN INPUTTING SOMETHING
-# TEST THAT ALL 3 FILES HAVE THE SAME CONTENT IN DIFFERENT FORMATS
+  def test_can_persist_float_type_parameter_returns_true(self):
+    assert MetricsCalculation.can_persist({'a':2.0})
+
+  def test_can_persist_one_channel_empty_data_returns_true(self):
+    assert MetricsCalculation.can_persist({'X':np.array([])})
+  
+  def test_can_persist_one_channel_full_data_returns_true(self):
+    assert MetricsCalculation.can_persist({'X':np.array([1,2,3,4])})
+  
+  def test_can_persist_n_channel_empty_data_returns_true(self):
+    assert MetricsCalculation.can_persist({'X':np.array([]),
+                                                'Y':np.array([])})
+  
+  def test_can_persist_n_channel_full_data_returns_true(self):
+    assert MetricsCalculation.can_persist({'X':np.array([1,2,3,4]),
+                                                'Y':np.array([1.0,2.0,3.0,4.0])})  
+
+  # Tests for persist_data
+  def test_persist_incorrect_parameters_does_not_create_files(self):
+    MetricsCalculation.persist_data({'a':'incorrect_data'}, 'test')
+    regex = re.compile('.*test*')
+    directory_contents = os.listdir("./data/processed")
+    assert len(list(filter(regex.match, directory_contents))) == 0
+  
+  def test_persist_parameters_successfully_creates_files(self):
+    MetricsCalculation.persist_data({'a':0}, 'test')
+    regex = re.compile('.*test*')
+    directory_contents = os.listdir("./data/processed")
+    assert len(list(filter(regex.match, directory_contents))) == 3
+    
+  def test_persist_incorrect_channels_does_not_creates_files(self):
+    MetricsCalculation.persist_data({'X':'incorrect_data'}, 'test')
+    regex = re.compile('.*test*')
+    directory_contents = os.listdir("./data/processed")
+    assert len(list(filter(regex.match, directory_contents))) == 0
+  
+  def test_persist_channels_successfully_creates_files(self):
+    MetricsCalculation.persist_data({'X':np.array([])}, 'test')
+    regex = re.compile('.*test*')
+    directory_contents = os.listdir("./data/processed")
+    assert len(list(filter(regex.match, directory_contents))) == 3
+
+  def test_persist_parameters_contain_something_in_files(self):
+    MetricsCalculation.persist_data({'a':0}, 'test')
+    regex = re.compile('.*test*')
+    path_to_directory = "./data/processed"
+    directory_contents = os.listdir(path_to_directory)
+    filtered_contents = list(filter(regex.match, directory_contents))
+    for filename in filtered_contents:
+      with open(os.path.join(path_to_directory, filename), 'r') as f:
+        lines = f.readlines()
+        assert len(lines) > 0
+  
+  def test_persist_channels_contain_something_in_files(self):
+    MetricsCalculation.persist_data({'X':np.array([])}, 'test')
+    regex = re.compile('.*test*')
+    path_to_directory = "./data/processed"
+    directory_contents = os.listdir(path_to_directory)
+    filtered_contents = list(filter(regex.match, directory_contents))
+    for filename in filtered_contents:
+      with open(os.path.join(path_to_directory, filename), 'r') as f:
+        lines = f.readlines()
+        assert len(lines) > 0
+  
+  def test_persist_channels_all_files_contain_same_data(self):
+    MetricsCalculation.persist_data({'X':np.array([0])}, 'test')
+    regex = re.compile('.*test*')
+    path_to_directory = "./data/processed"
+    directory_contents = os.listdir(path_to_directory)
+    filtered_contents = list(filter(regex.match, directory_contents))
+    
+    csv_data, txt_data, json_data = load_files(path_to_directory, filtered_contents)
+    txt_data = {k : [int(v)] for k,v in txt_data.items()}
+    assert txt_data == json_data
+    for k in json_data.keys():
+      assert json_data[k] == [int(csv_data[k])]
+      assert txt_data[k] == [int(csv_data[k])]
+
+  def test_persist_parameters_all_files_contain_same_data(self):
+    MetricsCalculation.persist_data({'a':0}, 'test')
+    regex = re.compile('.*test*')
+    path_to_directory = "./data/processed"
+    directory_contents = os.listdir(path_to_directory)
+    filtered_contents = list(filter(regex.match, directory_contents))
+    
+    csv_data, txt_data, json_data = load_files(path_to_directory, filtered_contents)
+    txt_data = {k : int(v) for k,v in txt_data.items()}
+    assert txt_data == json_data
+    for k in json_data.keys():
+      assert json_data[k] == int(csv_data[k])
+      assert txt_data[k] == int(csv_data[k])
+
+
+def clean_files():
+  p = re.compile('.*test*')
+  path_to_contents = "./data/processed"
+  directory_contents = os.listdir(path_to_contents)
+  contents_to_delete = list(filter(p.match, directory_contents))
+  for c in contents_to_delete:
+    os.remove(os.path.join(path_to_contents,c))
+
+def load_files(path_to_directory, filtered_contents):
+  for filename in filtered_contents:
+    # Since in python the instruction switch case does not exist; ifs must be used
+    if filename.endswith('.csv'):
+      csv_data = pd.read_csv(os.path.join(path_to_directory,filename))
+    elif filename.endswith('.txt'):
+      with open(os.path.join(path_to_directory,filename), 'r') as f:
+        lines = f.readlines()
+        txt_data = {}
+        for line in lines:
+          tokens = line.split(',')
+          txt_data[tokens[0]] = tokens[1]
+    elif filename.endswith('.json'):
+      with open(os.path.join(path_to_directory,filename), 'r') as f:
+        json_data = json.load(f)
+    else:
+      pytest.fail("File extension not recognised")
+  return csv_data, txt_data, json_data
