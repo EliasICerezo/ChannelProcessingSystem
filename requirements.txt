@@ -1,2 +1,6 @@
+autopep8
 numpy
 pandas
+pylint
+pytest
+pytest-cov
