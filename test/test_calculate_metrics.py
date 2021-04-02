@@ -67,43 +67,43 @@ class TestCalculateMetrics():
         assert sum(channels.get('C')) == 2
         assert parameters.get('b') == 1
 
-    # Tests for is_possible_to_calculate
-    def test_is_possible_to_calculate_when_called_with_X_channel_None_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({'X': None}, {})
+    # Tests for can_calculate
+    def test_can_calculate_when_called_with_X_channel_None_returns_false(self):
+        assert not MetricsCalculation.can_calculate({'X': None}, {})
 
-    def test_is_possible_to_calculate_when_called_with_m_parameter_None_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({}, {'m': None})
+    def test_can_calculate_when_called_with_m_parameter_None_returns_false(self):
+        assert not MetricsCalculation.can_calculate({}, {'m': None})
 
-    def test_is_possible_to_calculate_when_called_with_c_parameter_None_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({}, {'c': None})
+    def test_can_calculate_when_called_with_c_parameter_None_returns_false(self):
+        assert not MetricsCalculation.can_calculate({}, {'c': None})
 
-    def test_is_possible_to_calculate_when_called_with_X_channel_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({'X': 0}, {})
+    def test_can_calculate_when_called_with_X_channel_returns_false(self):
+        assert not MetricsCalculation.can_calculate({'X': 0}, {})
 
-    def test_is_possible_to_calculate_when_called_with_m_parameter_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({}, {'m': 0})
+    def test_can_calculate_when_called_with_m_parameter_returns_false(self):
+        assert not MetricsCalculation.can_calculate({}, {'m': 0})
 
-    def test_is_possible_to_calculate_when_called_with_c_parameter_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({}, {'c': 0})
+    def test_can_calculate_when_called_with_c_parameter_returns_false(self):
+        assert not MetricsCalculation.can_calculate({}, {'c': 0})
 
-    def test_is_possible_to_calculate_when_called_with_all_values_populated_as_None_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({'X': None}, {'c': None,
+    def test_can_calculate_when_called_with_all_values_populated_as_None_returns_false(self):
+        assert not MetricsCalculation.can_calculate({'X': None}, {'c': None,
                                                                              'm': None})
 
-    def test_is_possible_to_calculate_when_called_with_all_values_populated_but_X_is_not_a_numpy_aray_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({'X': []}, {'c': 0,
+    def test_can_calculate_when_called_with_all_values_populated_but_X_is_not_a_numpy_aray_returns_false(self):
+        assert not MetricsCalculation.can_calculate({'X': []}, {'c': 0,
                                                                            'm': 0})
 
-    def test_is_possible_to_calculate_when_called_with_all_values_populated_but_X_is_an_empty_numpy_aray_returns_false(self):
-        assert not MetricsCalculation.is_possible_to_calculate({'X': np.array([])}, {'c': 0,
+    def test_can_calculate_when_called_with_all_values_populated_but_X_is_an_empty_numpy_aray_returns_false(self):
+        assert not MetricsCalculation.can_calculate({'X': np.array([])}, {'c': 0,
                                                                                      'm': 0})
 
-    def test_is_possible_to_calculate_when_called_with_all_values_populated_but_X_is_an_one_element_numpy_aray_returns_true(self):
-        assert MetricsCalculation.is_possible_to_calculate({'X': np.array([1])}, {'c': 0,
+    def test_can_calculate_when_called_with_all_values_populated_but_X_is_an_one_element_numpy_aray_returns_true(self):
+        assert MetricsCalculation.can_calculate({'X': np.array([1])}, {'c': 0,
                                                                                   'm': 0})
 
-    def test_is_possible_to_calculate_when_called_with_all_values_populated_but_X_is_an_n_element_numpy_aray_returns_true(self):
-        assert MetricsCalculation.is_possible_to_calculate({'X': np.array([1, 2, 3, 4])}, {'c': 0,
+    def test_can_calculate_when_called_with_all_values_populated_but_X_is_an_n_element_numpy_aray_returns_true(self):
+        assert MetricsCalculation.can_calculate({'X': np.array([1, 2, 3, 4])}, {'c': 0,
                                                                                            'm': 0})
     # Tests for can_persist
 

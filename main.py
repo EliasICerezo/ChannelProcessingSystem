@@ -4,7 +4,6 @@ import pandas as pd
 import time
 import os
 
-# TODO: add an arogument to the execution like --collect-metrics and map that to the metrics collection
 # Metrics collection
 if os.path.isfile('./data/performance/performance_metrics.csv'):
     metrics = pd.read_csv('./data/performance/performance_metrics.csv')
