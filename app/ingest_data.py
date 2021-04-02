@@ -35,7 +35,9 @@ class DataIngestor():
       with open(path_to_channels) as f:
         lines = f.readlines()
         for line in lines:
-          tokens = line.split(',')
+          tokens = line.split(', ')
+          if '' in tokens:
+            tokens.remove('')
           if len(tokens) < 2:
             raise Exception("Error while processing channels: Channel not defined correctly")
           dataset = [float(e) for e in tokens[1:]]
@@ -44,7 +46,9 @@ class DataIngestor():
       with open(path_to_parameters) as f:
         lines = f.readlines()
         for line in lines:
-          tokens = line.split(',')
+          tokens = line.split(', ')
+          if '' in tokens:
+            tokens.remove('')
           if len(tokens) != 2:
             raise Exception("Error while processing parameters: Parameter not defined correctly")
           parameters[tokens[0]] = float(tokens[1])
@@ -53,7 +57,15 @@ class DataIngestor():
         end = time.time()
         metrics = metrics.append({'key': 'data_loading', 'value':end-start},
                                ignore_index = True)
+      
+      if not DataIngestor.validate_ingested_data(channels,parameters):
+        raise Exception("Channels and parameters are not well defined in the files")
 
       return channels,parameters,metrics
     else:
       raise OSError("Either of the paths provided do not reference a file")
+
+  @staticmethod
+  def validate_ingested_data(channels,parameters):
+    return all([k.isupper() for k in list(channels.keys())]) and \
+           all([k.islower() for k in list(parameters.keys())])
