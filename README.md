@@ -29,6 +29,8 @@ In order to execute the solution manually follow these steps:
 
 ### Execution of the tests
 The tests can be run and coverage can be extracted by executing: `pytest --cov app`.
+## Value of the parameter 'b'
+As per requested in the assignment, the value of the parameter 'b' can be found in the parameters export under `data/processed/parameters.csv`. The value obtained in floating point by python (floating point calculation errors may need to be considered) is `6.269852166777007`.
 ### Test coverage report
 
 | Name                     | Statemets | Miss | Coverage |
@@ -41,8 +43,6 @@ In order to feed data into the solution, we take as formatting rules the ones ap
 ## Persistence of the metrics calculated
 Channels and parameters calculated have been stored in both the original format, JSON and CSV. The original format is the first considered since it is the format that other software in the ecosystem where this solution would be deployed may use per input. JSON is added since it is one of the most popular formats to ingest data into systems as well as CSV is. The latter also can be imported into Excel for data visualization and presentation.
 All processed files can be found under `./data/processed/` directory.
-## Value of the parameter 'b'
-As per requested in the assignment, the value of the parameter 'b' can be found in the parameters export under `data/processed/parameters.csv`. The value obtained in floating point by python (floating point calculation errors may need to be considered) is `6.269852166777007`.
 
 # Performance Analysis
 After implementing the solution, a performance report is generated to provide an idea of the execution time expected.  
