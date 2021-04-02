@@ -4,3 +4,4 @@ pandas
 pylint
 pytest
 pytest-cov
+scipy
