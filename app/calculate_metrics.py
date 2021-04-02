@@ -1,4 +1,4 @@
-"""Class that calculate the metrics as the exercise requests
+"""Module that calculate the metrics as the exercise requests
 """
 import json
 import time
@@ -16,10 +16,10 @@ class MetricsCalculation():
         in the system specification
 
         Args:
-            channels (dict): Dictionary containing the channels that have been loaded
-            previously.
-            parameters (dict): Dictionary containing the parameters that have been loaded
-            before
+            channels (dict): Dictionary containing the channels needed for
+            the metrics calculation.
+            parameters (dict): Dictionary containing the parameters needed for
+            the metrics calculation.
             metrics (pd.DataFrame, optional): Dataframe containing the performance
             metrics. Defaults to None.
 
@@ -29,7 +29,7 @@ class MetricsCalculation():
 
         Returns:
             tuple: Tuple containing the calculated channels, calculated parameters
-            and metrics
+            and metrics, if provided
         """
         if not MetricsCalculation.can_calculate(channels, parameters):
             raise AttributeError("Parameters and channels required for metrics \
@@ -59,7 +59,7 @@ class MetricsCalculation():
         """Method that validates the inputs for the metrics processing
 
         Args:
-            channels (dict): Data channels
+            channels (dict): Channels data
             parameters (dict): Parameters data
 
         Returns:

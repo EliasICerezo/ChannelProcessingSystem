@@ -12,8 +12,8 @@ class DataIngestor():
     @staticmethod
     def ingest_data(path_to_channels: str, path_to_parameters: str,
                     metrics: pd.DataFrame = None) -> tuple:
-        """Function that processes channels and parameters and returns them into a
-        dictionary
+        """Method that loads channels and parameters from file and returns them 
+        into adictionary
 
         Args:
             path_to_channels (str): Path to the channels file
@@ -21,7 +21,7 @@ class DataIngestor():
 
         Raises:
             Exception: If the parameters or channels are not defined correctly
-                       (parameter example: "m ,2.0") (channel example: "x, 0.1, 0.2")
+                       (parameter example: "M ,2.0") (channel example: "x, 0.1, 0.2")
             OSError: If the paths passed as parameter do not reference a file
 
         Returns:
